@@ -175,7 +175,8 @@ namespace PaydayFranchiseRandomHeistSelecter
             "Houston Breakout",
             "Diamond District",
             "Fear & Greed",
-            "First World Bank"
+            "First World Bank",
+            "Party Powder"
         };
 
 
@@ -944,6 +945,12 @@ namespace PaydayFranchiseRandomHeistSelecter
                             if (chkPD3FirstWorldBank.Checked == true)
                             {
                                 CurrentAvailability.Add("First World Bank");
+                            }
+                            break;
+                        case 16:
+                            if (chkPD3PartyPowder.Checked == true)
+                            {
+                                CurrentAvailability.Add("Party Powder");
                             }
                             break;
                     }
@@ -1954,6 +1961,7 @@ namespace PaydayFranchiseRandomHeistSelecter
                     chkPD3DiamondDistrict.Location = controlPositionsHeists[13];
                     chkPD3FearNGreed.Location = controlPositionsHeists[14];
                     chkPD3FirstWorldBank.Location = controlPositionsHeists[15];
+                    chkPD3PartyPowder.Location = controlPositionsHeists[16];
                 }
                 if (sortMethod == 1)
                 {
@@ -1965,22 +1973,23 @@ namespace PaydayFranchiseRandomHeistSelecter
                     chkPD3TheButcher.Location = controlPositionsContractors[5];
                     chkPD3Shayu.Location = controlPositionsContractors[6];
                     chkPD3Shade.Location = controlPositionsContractors[7];
-                    chkPD3FirstWorldBank.Location = controlPositionsHeists[0];
-                    chkPD3FearNGreed.Location = controlPositionsHeists[1];
-                    chkPD3DiamondDistrict.Location = controlPositionsHeists[2];
-                    chkPD3HoustonBreakout.Location = controlPositionsHeists[3];
-                    chkPD3BoysInBlue.Location = controlPositionsHeists[4];
-                    chkPD3SyntaxError.Location = controlPositionsHeists[5];
-                    chkPD3CookOff.Location = controlPositionsHeists[6];
-                    chkPD3TurbidStation.Location = controlPositionsHeists[7];
-                    chkPD3TouchTheSky.Location = controlPositionsHeists[8];
-                    chkPD399Boxes.Location = controlPositionsHeists[9];
-                    chkPD3GoldNSharke.Location = controlPositionsHeists[10];
-                    chkPD3UnderTheSurphaze.Location = controlPositionsHeists[11];
-                    chkPD3RockTheCradle.Location = controlPositionsHeists[12];
-                    chkPD3DirtyIce.Location = controlPositionsHeists[13];
-                    chkPD3RoadRage.Location = controlPositionsHeists[14];
-                    chkPD3NoRestForTheWicked.Location = controlPositionsHeists[15];
+                    chkPD3PartyPowder.Location= controlPositionsHeists[0];
+                    chkPD3FirstWorldBank.Location = controlPositionsHeists[1];
+                    chkPD3FearNGreed.Location = controlPositionsHeists[2];
+                    chkPD3DiamondDistrict.Location = controlPositionsHeists[3];
+                    chkPD3HoustonBreakout.Location = controlPositionsHeists[4];
+                    chkPD3BoysInBlue.Location = controlPositionsHeists[5];
+                    chkPD3SyntaxError.Location = controlPositionsHeists[6];
+                    chkPD3CookOff.Location = controlPositionsHeists[7];
+                    chkPD3TurbidStation.Location = controlPositionsHeists[8];
+                    chkPD3TouchTheSky.Location = controlPositionsHeists[9];
+                    chkPD399Boxes.Location = controlPositionsHeists[10];
+                    chkPD3GoldNSharke.Location = controlPositionsHeists[11];
+                    chkPD3UnderTheSurphaze.Location = controlPositionsHeists[12];
+                    chkPD3RockTheCradle.Location = controlPositionsHeists[13];
+                    chkPD3DirtyIce.Location = controlPositionsHeists[14];
+                    chkPD3RoadRage.Location = controlPositionsHeists[15];
+                    chkPD3NoRestForTheWicked.Location = controlPositionsHeists[16];
                 }
                 if (sortMethod == 2)
                 {
@@ -2002,12 +2011,13 @@ namespace PaydayFranchiseRandomHeistSelecter
                     chkPD3GoldNSharke.Location = controlPositionsHeists[7];
                     chkPD3HoustonBreakout.Location = controlPositionsHeists[8];
                     chkPD3NoRestForTheWicked.Location = controlPositionsHeists[9];
-                    chkPD3RoadRage.Location = controlPositionsHeists[10];
-                    chkPD3RockTheCradle.Location = controlPositionsHeists[11];
-                    chkPD3SyntaxError.Location = controlPositionsHeists[12];
-                    chkPD3TouchTheSky.Location = controlPositionsHeists[13];
-                    chkPD3TurbidStation.Location = controlPositionsHeists[14];
-                    chkPD3UnderTheSurphaze.Location = controlPositionsHeists[15];
+                    chkPD3PartyPowder.Location = controlPositionsHeists[10];
+                    chkPD3RoadRage.Location = controlPositionsHeists[11];
+                    chkPD3RockTheCradle.Location = controlPositionsHeists[12];
+                    chkPD3SyntaxError.Location = controlPositionsHeists[13];
+                    chkPD3TouchTheSky.Location = controlPositionsHeists[14];
+                    chkPD3TurbidStation.Location = controlPositionsHeists[15];
+                    chkPD3UnderTheSurphaze.Location = controlPositionsHeists[16];
                 }
                 if (sortMethod == 3)
                 {
@@ -2025,16 +2035,17 @@ namespace PaydayFranchiseRandomHeistSelecter
                     chkPD3SyntaxError.Location = controlPositionsHeists[3];
                     chkPD3RockTheCradle.Location = controlPositionsHeists[4];
                     chkPD3RoadRage.Location = controlPositionsHeists[5];
-                    chkPD3NoRestForTheWicked.Location = controlPositionsHeists[6];
-                    chkPD3HoustonBreakout.Location = controlPositionsHeists[7];
-                    chkPD3GoldNSharke.Location = controlPositionsHeists[8];
-                    chkPD3FirstWorldBank.Location = controlPositionsHeists[9];
-                    chkPD3FearNGreed.Location = controlPositionsHeists[10];
-                    chkPD3DirtyIce.Location = controlPositionsHeists[11];
-                    chkPD3DiamondDistrict.Location = controlPositionsHeists[12];
-                    chkPD3CookOff.Location = controlPositionsHeists[13];
-                    chkPD3BoysInBlue.Location = controlPositionsHeists[14];
-                    chkPD399Boxes.Location = controlPositionsHeists[15];
+                    chkPD3PartyPowder.Location = controlPositionsHeists[6];
+                    chkPD3NoRestForTheWicked.Location = controlPositionsHeists[7];
+                    chkPD3HoustonBreakout.Location = controlPositionsHeists[8];
+                    chkPD3GoldNSharke.Location = controlPositionsHeists[9];
+                    chkPD3FirstWorldBank.Location = controlPositionsHeists[10];
+                    chkPD3FearNGreed.Location = controlPositionsHeists[11];
+                    chkPD3DirtyIce.Location = controlPositionsHeists[12];
+                    chkPD3DiamondDistrict.Location = controlPositionsHeists[13];
+                    chkPD3CookOff.Location = controlPositionsHeists[14];
+                    chkPD3BoysInBlue.Location = controlPositionsHeists[15];
+                    chkPD399Boxes.Location = controlPositionsHeists[16];
                 }
                 //visible
                 lblMethods.Visible = true;
@@ -2057,6 +2068,7 @@ namespace PaydayFranchiseRandomHeistSelecter
                 chkPD3SyntaxError.Visible = true;
                 chkPD3RockTheCradle.Visible = true;
                 chkPD3RoadRage.Visible = true;
+                chkPD3PartyPowder.Visible = true;
                 chkPD3NoRestForTheWicked.Visible = true;
                 chkPD3HoustonBreakout.Visible = true;
                 chkPD3GoldNSharke.Visible = true;
@@ -2955,7 +2967,8 @@ namespace PaydayFranchiseRandomHeistSelecter
                 chkPD3HoustonBreakout.Checked == true ||
                 chkPD3DiamondDistrict.Checked == true ||
                 chkPD3FearNGreed.Checked == true ||
-                chkPD3FirstWorldBank.Checked == true)
+                chkPD3FirstWorldBank.Checked == true ||
+                chkPD3PartyPowder.Checked == true)
             {
                 chkPD3Hybrid.Checked = true;
             }
@@ -2982,7 +2995,8 @@ namespace PaydayFranchiseRandomHeistSelecter
             {
                 chkPD3Shade.Checked = false;
             }
-            if (chkPD3RoadRage.Checked == true)
+            if (chkPD3RoadRage.Checked == true ||
+                chkPD3PartyPowder.Checked == true)
             {
                 chkPD3Shayu.Checked = true;
             }
@@ -3076,6 +3090,7 @@ namespace PaydayFranchiseRandomHeistSelecter
                 chkPD3DiamondDistrict.Checked = true;
                 chkPD3FearNGreed.Checked = true;
                 chkPD3FirstWorldBank.Checked = true;
+                chkPD3PartyPowder.Checked = true;
             }
             else
             {
@@ -3092,6 +3107,7 @@ namespace PaydayFranchiseRandomHeistSelecter
                 chkPD3DiamondDistrict.Checked = false;
                 chkPD3FearNGreed.Checked = false;
                 chkPD3FirstWorldBank.Checked = false;
+                chkPD3PartyPowder.Checked = false;
             }
             PD3Parity();
         }
@@ -3133,10 +3149,12 @@ namespace PaydayFranchiseRandomHeistSelecter
             if (chkPD3Shayu.Checked == true)
             {
                 chkPD3RoadRage.Checked = true;
+                chkPD3PartyPowder.Checked = true;
             }
             else
             {
                 chkPD3RoadRage.Checked = false;
+                chkPD3PartyPowder.Checked= false;
             }
             PD3Parity();
         }
@@ -3150,8 +3168,8 @@ namespace PaydayFranchiseRandomHeistSelecter
             }
             else
             {
-                chkPD3DirtyIce.Checked = true;
-                chkPD3SyntaxError.Checked = true;
+                chkPD3DirtyIce.Checked = false;
+                chkPD3SyntaxError.Checked = false;
             }
             PD3Parity();
         }
@@ -3233,7 +3251,7 @@ namespace PaydayFranchiseRandomHeistSelecter
         {
             MessageBox.Show($"The only thing that is accounted for when rolling for a heist is what check boxes are checked in the Individual Heists section, the Contractors and Methods are not used directly by the roller.\n\n" +
                             $"You can set how many rows are in each section individually. The defaults are 1, 4, and 8 from top to bottom, this is a remnant from when this project was being made in Scratch.\n\n" +
-                            $"If you'd wish to have each section be perfect squares/rectangles then I have a list of factors you can use:\nMethods: (1,3)\nPayday 2's contractors: (1,16), (2,8), (4,4)\nPayday 2's heists: (1,85), (5,17)\nPayday 3's contractors: (1,8), (2,4)\nPayday 3's heists: (1,16), (2,8), (4,4)\n\n" +
+                            $"If you'd wish to have each section be perfect squares/rectangles then I have a list of factors you can use:\nMethods: (1,3)\nPayday 2's contractors: (1,16), (2,8), (4,4)\nPayday 2's heists: (1,85), (5,17)\nPayday 3's contractors: (1,8), (2,4)\nPayday 3's heists: (1,17)\n\n" +
                             $"Like all my projects this will be updated based on how much I'm into the thing it's based on.", "Documentation");
         }
 
@@ -3392,6 +3410,7 @@ namespace PaydayFranchiseRandomHeistSelecter
             saveData += $"{chkPD3TurbidStation.Checked}\n";
             saveData += $"{chkPD3UnderTheSurphaze.Checked}\n";
             saveData += $"{chkPD3Vlad.Checked}";
+            saveData += $"{chkPD3PartyPowder.Checked}";
             string fileName = "";
             using (FileNameSaver inputDialog = new FileNameSaver("Enter a name for the text file:"))
             {
@@ -3576,6 +3595,7 @@ namespace PaydayFranchiseRandomHeistSelecter
                 chkPD3TurbidStation.Checked = bool.Parse(content[142]);
                 chkPD3UnderTheSurphaze.Checked = bool.Parse(content[143]);
                 chkPD3Vlad.Checked = bool.Parse(content[144]);
+                chkPD3PartyPowder.Checked = bool.Parse(content[145]);
                 Cancel();
                 Theme();
                 MessageBox.Show($"File loaded successfully", "Success");
