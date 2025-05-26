@@ -3,7 +3,7 @@ Allows for the random selection of a heist from a user selected pool of heists f
 # Change Log
 5/26/25
 - Added Party Powder
-- Fixed The Butcher in Payday 3 from being unable to be unchecked from clicking on her check box
+- Fixed The Butcher in Payday 3 from being unable to be unchecked by clicking on her checkbox
 
 5/23/25
 - Initial Release
