@@ -1,5 +1,6 @@
 using System.DirectoryServices.ActiveDirectory;
 using System.Text;
+using System.Text.Json;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace PaydayFranchiseRandomHeistSelecter
@@ -12,6 +13,8 @@ namespace PaydayFranchiseRandomHeistSelecter
         }
         List<string> OldAvailablity = [];
         List<string> CurrentAvailability = [];
+        List<int> weight = [];
+        List<int> weightHeists = [];
         int previousHeist = -1;
         string previousHeistName;
         Random random = new();
@@ -20,6 +23,7 @@ namespace PaydayFranchiseRandomHeistSelecter
         int numRowsMethod = 1;
         int sortMethod = 0;
         int theme = 1;
+        int selectionMethod = 0;
 
         //pocket wikis
         string[] PD2n3MethodOrderInfo =
@@ -135,7 +139,7 @@ namespace PaydayFranchiseRandomHeistSelecter
             "The White House",
             "Border Crossing",
             "Border Crystals",
-            "San Martín Bank",
+            "San Martï¿½n Bank",
             "Breakfast In Tijuana",
             "Buluc's Mansion",
             "Dragon Heist",
@@ -197,6 +201,9 @@ namespace PaydayFranchiseRandomHeistSelecter
             cboTheme.Items.Add("Dark");
             cboTheme.Items.Add("Crime.net");
             cboTheme.SelectedIndex = 1;
+            cboSelectMethod.Items.Add("Default Randomness");
+            cboSelectMethod.Items.Add("Neglection Weighting");
+            cboSelectMethod.SelectedIndex = 0;
             Theme();
             rdoPD2.Checked = true;
             foreach (TabPage tabPage in tbcMain.TabPages)
@@ -213,6 +220,8 @@ namespace PaydayFranchiseRandomHeistSelecter
 
         private void btnRoll_Click(object sender, EventArgs e)
         {
+            btnRoll.Enabled = false;
+            lblHeist.Text = "Deciding";
             int generatedHeist;
             CurrentAvailability.Clear();
             if (rdoPDTH.Checked)
@@ -277,29 +286,6 @@ namespace PaydayFranchiseRandomHeistSelecter
                             }
                             break;
                     }
-                }
-                if (CurrentAvailability.Count >= 2)
-                {
-                    if (!CurrentAvailability.SequenceEqual(OldAvailablity)) // if the the previous roll and the current roll dont have the same selection of heists
-                    {
-                        generatedHeist = random.Next(0, CurrentAvailability.Count);
-                        lblHeist.Text = CurrentAvailability[generatedHeist];
-                        previousHeist = generatedHeist;
-                        OldAvailablity = CurrentAvailability;
-                    }
-                    else if (CurrentAvailability.SequenceEqual(OldAvailablity)) // if the the previous roll and the current roll have the same selection of heists
-                    {
-                        do
-                        {
-                            generatedHeist = random.Next(0, CurrentAvailability.Count);
-                        } while (generatedHeist == previousHeist);
-                        lblHeist.Text = CurrentAvailability[generatedHeist];
-                        previousHeist = generatedHeist;
-                    }
-                }
-                else
-                {
-                    lblHeist.Text = "Please have at least 2 heists selected";
                 }
             }
             if (rdoPD2.Checked)
@@ -665,7 +651,7 @@ namespace PaydayFranchiseRandomHeistSelecter
                         case 59:
                             if (chkPD2SanMartinBank.Checked == true)
                             {
-                                CurrentAvailability.Add("San Martín Bank");
+                                CurrentAvailability.Add("San Martï¿½n Bank");
                             }
                             break;
                         case 60:
@@ -820,29 +806,6 @@ namespace PaydayFranchiseRandomHeistSelecter
                             break;
                     }
                 }
-                if (CurrentAvailability.Count >= 2)
-                {
-                    if (!CurrentAvailability.SequenceEqual(OldAvailablity)) // if the the previous roll and the current roll dont have the same selection of heists
-                    {
-                        generatedHeist = random.Next(0, CurrentAvailability.Count);
-                        lblHeist.Text = CurrentAvailability[generatedHeist];
-                        previousHeist = generatedHeist;
-                        OldAvailablity = CurrentAvailability;
-                    }
-                    else if (CurrentAvailability.SequenceEqual(OldAvailablity)) // if the the previous roll and the current roll have the same selection of heists
-                    {
-                        do
-                        {
-                            generatedHeist = random.Next(0, CurrentAvailability.Count);
-                        } while (generatedHeist == previousHeist);
-                        lblHeist.Text = CurrentAvailability[generatedHeist];
-                        previousHeist = generatedHeist;
-                    }
-                }
-                else
-                {
-                    lblHeist.Text = "Please have at least 2 heists selected";
-                }
             }
             if (rdoPD3.Checked)
             {
@@ -955,16 +918,22 @@ namespace PaydayFranchiseRandomHeistSelecter
                             break;
                     }
                 }
-                if (CurrentAvailability.Count >= 2)
+                
+            }
+            // new formating for randomness as of V1.2.0
+            if (CurrentAvailability.Count >= 2) // check to see if there is at least 2 heists selected
+            {
+                if (selectionMethod == 0) // if default randomness is selected
                 {
-                    if (!CurrentAvailability.SequenceEqual(OldAvailablity)) // if the the previous roll and the current roll dont have the same selection of heists
+                    if (!CurrentAvailability.SequenceEqual(OldAvailablity)) // if the previous roll and the current roll dont have the same selection of heists
                     {
                         generatedHeist = random.Next(0, CurrentAvailability.Count);
                         lblHeist.Text = CurrentAvailability[generatedHeist];
                         previousHeist = generatedHeist;
                         OldAvailablity = CurrentAvailability;
+                        btnRoll.Enabled = true;
                     }
-                    else if (CurrentAvailability.SequenceEqual(OldAvailablity)) // if the the previous roll and the current roll have the same selection of heists
+                    else if (CurrentAvailability.SequenceEqual(OldAvailablity)) // if the previous roll and the current roll have the same selection of heists
                     {
                         do
                         {
@@ -972,12 +941,58 @@ namespace PaydayFranchiseRandomHeistSelecter
                         } while (generatedHeist == previousHeist);
                         lblHeist.Text = CurrentAvailability[generatedHeist];
                         previousHeist = generatedHeist;
+                        btnRoll.Enabled = true;
                     }
                 }
-                else
+                if (selectionMethod == 1) // if neglection weighting is selected
                 {
-                    lblHeist.Text = "Please have at least 2 heists selected";
+                    if (!CurrentAvailability.SequenceEqual(OldAvailablity) || !weight.Any())
+                    {
+                        // Reinitialize weight list
+                        weight.Clear();
+                        for (int i = 0; i < CurrentAvailability.Count; i++)
+                        {
+                            weight.Add(1);
+                        }
+                        OldAvailablity = CurrentAvailability;
+                    }
+
+                    weightHeists.Clear();
+
+                    // Build weighted heist index list
+                    for (int i = 0; i < CurrentAvailability.Count; i++)
+                    {
+                        for (int j = 0; j < weight[i]; j++)
+                        {
+                            weightHeists.Add(i);
+                        }
+                    }
+
+                    // Pick a random heist
+                    generatedHeist = weightHeists[random.Next(weightHeists.Count)];
+                    lblHeist.Text = CurrentAvailability[generatedHeist];
+
+                    // Update weights
+                    for (int i = 0; i < weight.Count; i++)
+                    {
+                        if (i == generatedHeist)
+                        {
+                            weight[i] = 0;
+                        }
+                        else
+                        {
+                            weight[i]++;
+                        }
+                    }
+
+                    weightHeists.Clear();
+                    btnRoll.Enabled = true;
                 }
+            }
+            else
+            {
+                lblHeist.Text = "Have at least 2 heists selected";
+                btnRoll.Enabled = true;
             }
         }
         private void ClearResult()
@@ -1029,7 +1044,9 @@ namespace PaydayFranchiseRandomHeistSelecter
                 txtNumRowsMethod.Text = numRowsMethod.ToString();
                 sortMethod = cboSortMethod.SelectedIndex;
                 theme = cboTheme.SelectedIndex;
+                selectionMethod = cboSelectMethod.SelectedIndex;
                 Theme();
+                lblHeist.Text = "Changes applied";
             }
             else
             {
@@ -3254,165 +3271,318 @@ namespace PaydayFranchiseRandomHeistSelecter
                             $"If you'd wish to have each section be perfect squares/rectangles then I have a list of factors you can use:\nMethods: (1,3)\nPayday 2's contractors: (1,16), (2,8), (4,4)\nPayday 2's heists: (1,85), (5,17)\nPayday 3's contractors: (1,8), (2,4)\nPayday 3's heists: (1,17)\n\n" +
                             $"Like all my projects this will be updated based on how much I'm into the thing it's based on.", "Documentation");
         }
-
-        private void btnSaveCSV_Click(object sender, EventArgs e)
+        // user preferences
+        public class UserPreferences
+        {
+            public int numRowsMethod { get; set; }
+            public int numRowsCon { get; set; }
+            public int numRowsHeist { get; set; }
+            public int theme { get; set; }
+            public int selectionMethod { get; set; }
+            public int sortMethod { get; set; }
+            public bool chkPDTHCounterfeit { get; set; }
+            public bool chkPDTHDiamondHeist { get; set; }
+            public bool chkPDTHFirstWorldBank { get; set; }
+            public bool chkPDTHGreenBridge { get; set; }
+            public bool chkPDTHHeatStreet { get; set; }
+            public bool chkPDTHNoMercy { get; set; }
+            public bool chkPDTHPanicRoom { get; set; }
+            public bool chkPDTHSlaughterhouse { get; set; }
+            public bool chkPDTHUndercover { get; set; }
+            public bool chkPD2Aftershock { get; set; }
+            public bool chkPD2AlaskanDeal { get; set; }
+            public bool chkPD2ArtGallery { get; set; }
+            public bool chkPD2Bain { get; set; }
+            public bool chkPD2BankHeistCash { get; set; }
+            public bool chkPD2BankHeistDeposit { get; set; }
+            public bool chkPD2BankHeistGold { get; set; }
+            public bool chkPD2BankHeistRandom { get; set; }
+            public bool chkPD2BeneathTheMountain { get; set; }
+            public bool chkPD2BigOil { get; set; }
+            public bool chkPD2BirthOfSky { get; set; }
+            public bool chkPD2BlackCat { get; set; }
+            public bool chkPD2BlaineKeegan { get; set; }
+            public bool chkPD2BoilingPoint { get; set; }
+            public bool chkPD2BorderCrossing { get; set; }
+            public bool chkPD2BorderCrystals { get; set; }
+            public bool chkPD2BreakfastInTijuana { get; set; }
+            public bool chkPD2BreakinFeds { get; set; }
+            public bool chkPD2Brooklyn1010 { get; set; }
+            public bool chkPD2BrooklynBank { get; set; }
+            public bool chkPD2BulucsMansion { get; set; }
+            public bool chkPD2CarShop { get; set; }
+            public bool chkPD2Classic { get; set; }
+            public bool chkPD2CookOff { get; set; }
+            public bool chkPD2Counterfeit { get; set; }
+            public bool chkPD2CrudeAwakening { get; set; }
+            public bool chkPD2CursedKillRoom { get; set; }
+            public bool chkPD2DiamondHeist { get; set; }
+            public bool chkPD2DiamondStore { get; set; }
+            public bool chkPD2DragonHeist { get; set; }
+            public bool chkPD2ElectionDay { get; set; }
+            public bool chkPD2Event { get; set; }
+            public bool chkPD2Firestarter { get; set; }
+            public bool chkPD2FirstWorldBank { get; set; }
+            public bool chkPD2FourStores { get; set; }
+            public bool chkPD2FramingFrame { get; set; }
+            public bool chkPD2GemmaMCShay { get; set; }
+            public bool chkPD2GoatSimulator { get; set; }
+            public bool chkPD2GOBank { get; set; }
+            public bool chkPD2GoldenGrinCasino { get; set; }
+            public bool chkPD2GreenBridge { get; set; }
+            public bool chkPD2HeatStreet { get; set; }
+            public bool chkPD2Hector { get; set; }
+            public bool chkPD2HellsIsland { get; set; }
+            public bool chkPD2HenrysRock { get; set; }
+            public bool chkPD2HostileTakeover { get; set; }
+            public bool chkPD2HotlineMiami { get; set; }
+            public bool chkPD2Hoxton { get; set; }
+            public bool chkPD2HoxtonBreakout { get; set; }
+            public bool chkPD2HoxtonRevenge { get; set; }
+            public bool chkPD2Hybrid { get; set; }
+            public bool chkPD2JewelryStore { get; set; }
+            public bool chkPD2Jimmy { get; set; }
+            public bool chkPD2JiuFeng { get; set; }
+            public bool chkPD2LabRats { get; set; }
+            public bool chkPD2Locke { get; set; }
+            public bool chkPD2LostInTransit { get; set; }
+            public bool chkPD2Loud { get; set; }
+            public bool chkPD2Mallcrasher { get; set; }
+            public bool chkPD2Meltdown { get; set; }
+            public bool chkPD2MidlandRanch { get; set; }
+            public bool chkPD2MountainMaster { get; set; }
+            public bool chkPD2MurkyStation { get; set; }
+            public bool chkPD2Nightclub { get; set; }
+            public bool chkPD2NoMercy { get; set; }
+            public bool chkPD2PanicRoom { get; set; }
+            public bool chkPD2PrisonNightmare { get; set; }
+            public bool chkPD2Rats { get; set; }
+            public bool chkPD2ReservoirDogsHeist { get; set; }
+            public bool chkPD2SafeHouseNightmare { get; set; }
+            public bool chkPD2SafeHouseRaid { get; set; }
+            public bool chkPD2SanMartinBank { get; set; }
+            public bool chkPD2SantasWorkshop { get; set; }
+            public bool chkPD2ScarfaceMansion { get; set; }
+            public bool chkPD2ShacklethorneAuction { get; set; }
+            public bool chkPD2ShadowRaid { get; set; }
+            public bool chkPD2Shayu { get; set; }
+            public bool chkPD2Slaughterhouse { get; set; }
+            public bool chkPD2StealingXmas { get; set; }
+            public bool chkPD2Stealth { get; set; }
+            public bool chkPD2TheAlessoHeist { get; set; }
+            public bool chkPD2TheBigBank { get; set; }
+            public bool chkPD2TheBikerHeist { get; set; }
+            public bool chkPD2TheBombDockyard { get; set; }
+            public bool chkPD2TheBombForest { get; set; }
+            public bool chkPD2TheButcher { get; set; }
+            public bool chkPD2TheContinental { get; set; }
+            public bool chkPD2TheDentist { get; set; }
+            public bool chkPD2TheDiamond { get; set; }
+            public bool chkPD2TheElephant { get; set; }
+            public bool chkPD2TheUkrainianPrisoner { get; set; }
+            public bool chkPD2TheWhiteHouse { get; set; }
+            public bool chkPD2TheYachtHeist { get; set; }
+            public bool chkPD2TransportCrossroads { get; set; }
+            public bool chkPD2TransportDowntown { get; set; }
+            public bool chkPD2TransportHarbor { get; set; }
+            public bool chkPD2TransportPark { get; set; }
+            public bool chkPD2TransportTrainHeist { get; set; }
+            public bool chkPD2TransportUnderpass { get; set; }
+            public bool chkPD2UkrainianJob { get; set; }
+            public bool chkPD2Undercover { get; set; }
+            public bool chkPD2Vlad { get; set; }
+            public bool chkPD2Watchdogs { get; set; }
+            public bool chkPD2WhiteXmas { get; set; }
+            public bool chkPD399Boxes { get; set; }
+            public bool chkPD3Beckett { get; set; }
+            public bool chkPD3BlaineKeegan { get; set; }
+            public bool chkPD3BoysInBlue { get; set; }
+            public bool chkPD3CookOff { get; set; }
+            public bool chkPD3DiamondDistrict { get; set; }
+            public bool chkPD3DirtyIce { get; set; }
+            public bool chkPD3FearNGreed { get; set; }
+            public bool chkPD3FirstWorldBank { get; set; }
+            public bool chkPD3GoldNSharke { get; set; }
+            public bool chkPD3HoustonBreakout { get; set; }
+            public bool chkPD3Hybrid { get; set; }
+            public bool chkPD3Locke { get; set; }
+            public bool chkPD3Loud { get; set; }
+            public bool chkPD3Mac { get; set; }
+            public bool chkPD3NoRestForTheWicked { get; set; }
+            public bool chkPD3RoadRage { get; set; }
+            public bool chkPD3RockTheCradle { get; set; }
+            public bool chkPD3Shade { get; set; }
+            public bool chkPD3Shayu { get; set; }
+            public bool chkPD3Stealth { get; set; }
+            public bool chkPD3SyntaxError { get; set; }
+            public bool chkPD3TheButcher { get; set; }
+            public bool chkPD3TouchTheSky { get; set; }
+            public bool chkPD3TurbidStation { get; set; }
+            public bool chkPD3UnderTheSurphaze { get; set; }
+            public bool chkPD3Vlad { get; set; }
+            public bool chkPD3PartyPowder { get; set; }
+        }
+        private void btnSaveFile_Click(object sender, EventArgs e)
         {
             string homeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string expectedFolder = "PDRHS Prefrences Files";
+            string expectedFolder = "PDRHS Preferences Files";
             string expectedFolderPath = Path.Combine(homeDirectory, expectedFolder);
             if (!Directory.Exists(expectedFolderPath))
             {
                 Directory.CreateDirectory(expectedFolderPath);
             }
-            string saveData = ""; //i'll pry make it not hard coded eventually but this'll do for now
-            saveData += $"{numRowsMethod}\n";
-            saveData += $"{numRowsCon}\n";
-            saveData += $"{numRowsHeist}\n";
-            saveData += $"{sortMethod}\n";
-            saveData += $"{theme}\n";
-            saveData += $"{chkPDTHCounterfeit.Checked}\n";
-            saveData += $"{chkPDTHDiamondHeist.Checked}\n";
-            saveData += $"{chkPDTHFirstWorldBank.Checked}\n";
-            saveData += $"{chkPDTHGreenBridge.Checked}\n";
-            saveData += $"{chkPDTHHeatStreet.Checked}\n";
-            saveData += $"{chkPDTHNoMercy.Checked}\n";
-            saveData += $"{chkPDTHPanicRoom.Checked}\n";
-            saveData += $"{chkPDTHSlaughterhouse.Checked}\n";
-            saveData += $"{chkPDTHUndercover.Checked}\n";
-            saveData += $"{chkPD2Aftershock.Checked}\n";
-            saveData += $"{chkPD2AlaskanDeal.Checked}\n";
-            saveData += $"{chkPD2ArtGallery.Checked}\n";
-            saveData += $"{chkPD2Bain.Checked}\n";
-            saveData += $"{chkPD2BankHeistCash.Checked}\n";
-            saveData += $"{chkPD2BankHeistDeposit.Checked}\n";
-            saveData += $"{chkPD2BankHeistGold.Checked}\n";
-            saveData += $"{chkPD2BankHeistRandom.Checked}\n";
-            saveData += $"{chkPD2BeneathTheMountain.Checked}\n";
-            saveData += $"{chkPD2BigOil.Checked}\n";
-            saveData += $"{chkPD2BirthOfSky.Checked}\n";
-            saveData += $"{chkPD2BlackCat.Checked}\n";
-            saveData += $"{chkPD2BlaineKeegan.Checked}\n";
-            saveData += $"{chkPD2BoilingPoint.Checked}\n";
-            saveData += $"{chkPD2BorderCrossing.Checked}\n";
-            saveData += $"{chkPD2BorderCrystals.Checked}\n";
-            saveData += $"{chkPD2BreakfastInTijuana.Checked}\n";
-            saveData += $"{chkPD2BreakinFeds.Checked}\n";
-            saveData += $"{chkPD2Brooklyn1010.Checked}\n";
-            saveData += $"{chkPD2BrooklynBank.Checked}\n";
-            saveData += $"{chkPD2BulucsMansion.Checked}\n";
-            saveData += $"{chkPD2CarShop.Checked}\n";
-            saveData += $"{chkPD2Classic.Checked}\n";
-            saveData += $"{chkPD2CookOff.Checked}\n";
-            saveData += $"{chkPD2Counterfeit.Checked}\n";
-            saveData += $"{chkPD2CrudeAwakening.Checked}\n";
-            saveData += $"{chkPD2CursedKillRoom.Checked}\n";
-            saveData += $"{chkPD2DiamondHeist.Checked}\n";
-            saveData += $"{chkPD2DiamondStore.Checked}\n";
-            saveData += $"{chkPD2DragonHeist.Checked}\n";
-            saveData += $"{chkPD2ElectionDay.Checked}\n";
-            saveData += $"{chkPD2Event.Checked}\n";
-            saveData += $"{chkPD2Firestarter.Checked}\n";
-            saveData += $"{chkPD2FirstWorldBank.Checked}\n";
-            saveData += $"{chkPD2FourStores.Checked}\n";
-            saveData += $"{chkPD2FramingFrame.Checked}\n";
-            saveData += $"{chkPD2GemmaMCShay.Checked}\n";
-            saveData += $"{chkPD2GoatSimulator.Checked}\n";
-            saveData += $"{chkPD2GOBank.Checked}\n";
-            saveData += $"{chkPD2GoldenGrinCasino.Checked}\n";
-            saveData += $"{chkPD2GreenBridge.Checked}\n";
-            saveData += $"{chkPD2HeatStreet.Checked}\n";
-            saveData += $"{chkPD2Hector.Checked}\n";
-            saveData += $"{chkPD2HellsIsland.Checked}\n";
-            saveData += $"{chkPD2HenrysRock.Checked}\n";
-            saveData += $"{chkPD2HostileTakeover.Checked}\n";
-            saveData += $"{chkPD2HotlineMiami.Checked}\n";
-            saveData += $"{chkPD2Hoxton.Checked}\n";
-            saveData += $"{chkPD2HoxtonBreakout.Checked}\n";
-            saveData += $"{chkPD2HoxtonRevenge.Checked}\n";
-            saveData += $"{chkPD2Hybrid.Checked}\n";
-            saveData += $"{chkPD2JewelryStore.Checked}\n";
-            saveData += $"{chkPD2Jimmy.Checked}\n";
-            saveData += $"{chkPD2JiuFeng.Checked}\n";
-            saveData += $"{chkPD2LabRats.Checked}\n";
-            saveData += $"{chkPD2Locke.Checked}\n";
-            saveData += $"{chkPD2LostInTransit.Checked}\n";
-            saveData += $"{chkPD2Loud.Checked}\n";
-            saveData += $"{chkPD2Mallcrasher.Checked}\n";
-            saveData += $"{chkPD2Meltdown.Checked}\n";
-            saveData += $"{chkPD2MidlandRanch.Checked}\n";
-            saveData += $"{chkPD2MountainMaster.Checked}\n";
-            saveData += $"{chkPD2MurkyStation.Checked}\n";
-            saveData += $"{chkPD2Nightclub.Checked}\n";
-            saveData += $"{chkPD2NoMercy.Checked}\n";
-            saveData += $"{chkPD2PanicRoom.Checked}\n";
-            saveData += $"{chkPD2PrisonNightmare.Checked}\n";
-            saveData += $"{chkPD2Rats.Checked}\n";
-            saveData += $"{chkPD2ReservoirDogsHeist.Checked}\n";
-            saveData += $"{chkPD2SafeHouseNightmare.Checked}\n";
-            saveData += $"{chkPD2SafeHouseRaid.Checked}\n";
-            saveData += $"{chkPD2SanMartinBank.Checked}\n";
-            saveData += $"{chkPD2SantasWorkshop.Checked}\n";
-            saveData += $"{chkPD2ScarfaceMansion.Checked}\n";
-            saveData += $"{chkPD2ShacklethorneAuction.Checked}\n";
-            saveData += $"{chkPD2ShadowRaid.Checked}\n";
-            saveData += $"{chkPD2Shayu.Checked}\n";
-            saveData += $"{chkPD2Slaughterhouse.Checked}\n";
-            saveData += $"{chkPD2StealingXmas.Checked}\n";
-            saveData += $"{chkPD2Stealth.Checked}\n";
-            saveData += $"{chkPD2TheAlessoHeist.Checked}\n";
-            saveData += $"{chkPD2TheBigBank.Checked}\n";
-            saveData += $"{chkPD2TheBikerHeist.Checked}\n";
-            saveData += $"{chkPD2TheBombDockyard.Checked}\n";
-            saveData += $"{chkPD2TheBombForest.Checked}\n";
-            saveData += $"{chkPD2TheButcher.Checked}\n";
-            saveData += $"{chkPD2TheContinental.Checked}\n";
-            saveData += $"{chkPD2TheDentist.Checked}\n";
-            saveData += $"{chkPD2TheDiamond.Checked}\n";
-            saveData += $"{chkPD2TheElephant.Checked}\n";
-            saveData += $"{chkPD2TheUkrainianPrisoner.Checked}\n";
-            saveData += $"{chkPD2TheWhiteHouse.Checked}\n";
-            saveData += $"{chkPD2TheYachtHeist.Checked}\n";
-            saveData += $"{chkPD2TransportCrossroads.Checked}\n";
-            saveData += $"{chkPD2TransportDowntown.Checked}\n";
-            saveData += $"{chkPD2TransportHarbor.Checked}\n";
-            saveData += $"{chkPD2TransportPark.Checked}\n";
-            saveData += $"{chkPD2TransportTrainHeist.Checked}\n";
-            saveData += $"{chkPD2TransportUnderpass.Checked}\n";
-            saveData += $"{chkPD2UkrainianJob.Checked}\n";
-            saveData += $"{chkPD2Undercover.Checked}\n";
-            saveData += $"{chkPD2Vlad.Checked}\n";
-            saveData += $"{chkPD2Watchdogs.Checked}\n";
-            saveData += $"{chkPD2WhiteXmas.Checked}\n";
-            saveData += $"{chkPD399Boxes.Checked}\n";
-            saveData += $"{chkPD3Beckett.Checked}\n";
-            saveData += $"{chkPD3BlaineKeegan.Checked}\n";
-            saveData += $"{chkPD3BoysInBlue.Checked}\n";
-            saveData += $"{chkPD3CookOff.Checked}\n";
-            saveData += $"{chkPD3DiamondDistrict.Checked}\n";
-            saveData += $"{chkPD3DirtyIce.Checked}\n";
-            saveData += $"{chkPD3FearNGreed.Checked}\n";
-            saveData += $"{chkPD3FirstWorldBank.Checked}\n";
-            saveData += $"{chkPD3GoldNSharke.Checked}\n";
-            saveData += $"{chkPD3HoustonBreakout.Checked}\n";
-            saveData += $"{chkPD3Hybrid.Checked}\n";
-            saveData += $"{chkPD3Locke.Checked}\n";
-            saveData += $"{chkPD3Loud.Checked}\n";
-            saveData += $"{chkPD3Mac.Checked}\n";
-            saveData += $"{chkPD3NoRestForTheWicked.Checked}\n";
-            saveData += $"{chkPD3RoadRage.Checked}\n";
-            saveData += $"{chkPD3RockTheCradle.Checked}\n";
-            saveData += $"{chkPD3Shade.Checked}\n";
-            saveData += $"{chkPD3Shayu.Checked}\n";
-            saveData += $"{chkPD3Stealth.Checked}\n";
-            saveData += $"{chkPD3SyntaxError.Checked}\n";
-            saveData += $"{chkPD3TheButcher.Checked}\n";
-            saveData += $"{chkPD3TouchTheSky.Checked}\n";
-            saveData += $"{chkPD3TurbidStation.Checked}\n";
-            saveData += $"{chkPD3UnderTheSurphaze.Checked}\n";
-            saveData += $"{chkPD3Vlad.Checked}";
-            saveData += $"{chkPD3PartyPowder.Checked}";
+            UserPreferences data = new UserPreferences
+            {
+                numRowsMethod = numRowsMethod,
+                numRowsCon = numRowsCon,
+                numRowsHeist = numRowsHeist,
+                sortMethod = sortMethod,
+                selectionMethod = selectionMethod,
+                theme = theme,
+                chkPDTHCounterfeit = chkPDTHCounterfeit.Checked,
+                chkPDTHDiamondHeist = chkPDTHDiamondHeist.Checked,
+                chkPDTHFirstWorldBank = chkPDTHFirstWorldBank.Checked,
+                chkPDTHGreenBridge = chkPDTHGreenBridge.Checked,
+                chkPDTHHeatStreet = chkPDTHHeatStreet.Checked,
+                chkPDTHNoMercy = chkPDTHNoMercy.Checked,
+                chkPDTHPanicRoom = chkPDTHPanicRoom.Checked,
+                chkPDTHSlaughterhouse = chkPDTHSlaughterhouse.Checked,
+                chkPDTHUndercover = chkPDTHUndercover.Checked,
+                chkPD2Aftershock = chkPD2Aftershock.Checked,
+                chkPD2AlaskanDeal = chkPD2AlaskanDeal.Checked,
+                chkPD2ArtGallery = chkPD2ArtGallery.Checked,
+                chkPD2Bain = chkPD2Bain.Checked,
+                chkPD2BankHeistCash = chkPD2BankHeistCash.Checked,
+                chkPD2BankHeistDeposit = chkPD2BankHeistDeposit.Checked,
+                chkPD2BankHeistGold = chkPD2BankHeistGold.Checked,
+                chkPD2BankHeistRandom = chkPD2BankHeistRandom.Checked,
+                chkPD2BeneathTheMountain = chkPD2BeneathTheMountain.Checked,
+                chkPD2BigOil = chkPD2BigOil.Checked,
+                chkPD2BirthOfSky = chkPD2BirthOfSky.Checked,
+                chkPD2BlackCat = chkPD2BlackCat.Checked,
+                chkPD2BlaineKeegan = chkPD2BlaineKeegan.Checked,
+                chkPD2BoilingPoint = chkPD2BoilingPoint.Checked,
+                chkPD2BorderCrossing = chkPD2BorderCrossing.Checked,
+                chkPD2BorderCrystals = chkPD2BorderCrystals.Checked,
+                chkPD2BreakfastInTijuana = chkPD2BreakfastInTijuana.Checked,
+                chkPD2BreakinFeds = chkPD2BreakinFeds.Checked,
+                chkPD2Brooklyn1010 = chkPD2Brooklyn1010.Checked,
+                chkPD2BrooklynBank = chkPD2BrooklynBank.Checked,
+                chkPD2BulucsMansion = chkPD2BulucsMansion.Checked,
+                chkPD2CarShop = chkPD2CarShop.Checked,
+                chkPD2Classic = chkPD2Classic.Checked,
+                chkPD2CookOff = chkPD2CookOff.Checked,
+                chkPD2Counterfeit = chkPD2Counterfeit.Checked,
+                chkPD2CrudeAwakening = chkPD2CrudeAwakening.Checked,
+                chkPD2CursedKillRoom = chkPD2CursedKillRoom.Checked,
+                chkPD2DiamondHeist = chkPD2DiamondHeist.Checked,
+                chkPD2DiamondStore = chkPD2DiamondStore.Checked,
+                chkPD2DragonHeist = chkPD2DragonHeist.Checked,
+                chkPD2ElectionDay = chkPD2ElectionDay.Checked,
+                chkPD2Event = chkPD2Event.Checked,
+                chkPD2Firestarter = chkPD2Firestarter.Checked,
+                chkPD2FirstWorldBank = chkPD2FirstWorldBank.Checked,
+                chkPD2FourStores = chkPD2FourStores.Checked,
+                chkPD2FramingFrame = chkPD2FramingFrame.Checked,
+                chkPD2GemmaMCShay = chkPD2GemmaMCShay.Checked,
+                chkPD2GoatSimulator = chkPD2GoatSimulator.Checked,
+                chkPD2GOBank = chkPD2GOBank.Checked,
+                chkPD2GoldenGrinCasino = chkPD2GoldenGrinCasino.Checked,
+                chkPD2GreenBridge = chkPD2GreenBridge.Checked,
+                chkPD2HeatStreet = chkPD2HeatStreet.Checked,
+                chkPD2Hector = chkPD2Hector.Checked,
+                chkPD2HellsIsland = chkPD2HellsIsland.Checked,
+                chkPD2HenrysRock = chkPD2HenrysRock.Checked,
+                chkPD2HostileTakeover = chkPD2HostileTakeover.Checked,
+                chkPD2HotlineMiami = chkPD2HotlineMiami.Checked,
+                chkPD2Hoxton = chkPD2Hoxton.Checked,
+                chkPD2HoxtonBreakout = chkPD2HoxtonBreakout.Checked,
+                chkPD2HoxtonRevenge = chkPD2HoxtonRevenge.Checked,
+                chkPD2Hybrid = chkPD2Hybrid.Checked,
+                chkPD2JewelryStore = chkPD2JewelryStore.Checked,
+                chkPD2Jimmy = chkPD2Jimmy.Checked,
+                chkPD2JiuFeng = chkPD2JiuFeng.Checked,
+                chkPD2LabRats = chkPD2LabRats.Checked,
+                chkPD2Locke = chkPD2Locke.Checked,
+                chkPD2LostInTransit = chkPD2LostInTransit.Checked,
+                chkPD2Loud = chkPD2Loud.Checked,
+                chkPD2Mallcrasher = chkPD2Mallcrasher.Checked,
+                chkPD2Meltdown = chkPD2Meltdown.Checked,
+                chkPD2MidlandRanch = chkPD2MidlandRanch.Checked,
+                chkPD2MountainMaster = chkPD2MountainMaster.Checked,
+                chkPD2MurkyStation = chkPD2MurkyStation.Checked,
+                chkPD2Nightclub = chkPD2Nightclub.Checked,
+                chkPD2NoMercy = chkPD2NoMercy.Checked,
+                chkPD2PanicRoom = chkPD2PanicRoom.Checked,
+                chkPD2PrisonNightmare = chkPD2PrisonNightmare.Checked,
+                chkPD2Rats = chkPD2Rats.Checked,
+                chkPD2ReservoirDogsHeist = chkPD2ReservoirDogsHeist.Checked,
+                chkPD2SafeHouseNightmare = chkPD2SafeHouseNightmare.Checked,
+                chkPD2SafeHouseRaid = chkPD2SafeHouseRaid.Checked,
+                chkPD2SanMartinBank = chkPD2SanMartinBank.Checked,
+                chkPD2SantasWorkshop = chkPD2SantasWorkshop.Checked,
+                chkPD2ScarfaceMansion = chkPD2ScarfaceMansion.Checked,
+                chkPD2ShacklethorneAuction = chkPD2ShacklethorneAuction.Checked,
+                chkPD2ShadowRaid = chkPD2ShadowRaid.Checked,
+                chkPD2Shayu = chkPD2Shayu.Checked,
+                chkPD2Slaughterhouse = chkPD2Slaughterhouse.Checked,
+                chkPD2StealingXmas = chkPD2StealingXmas.Checked,
+                chkPD2Stealth = chkPD2Stealth.Checked,
+                chkPD2TheAlessoHeist = chkPD2TheAlessoHeist.Checked,
+                chkPD2TheBigBank = chkPD2TheBigBank.Checked,
+                chkPD2TheBikerHeist = chkPD2TheBikerHeist.Checked,
+                chkPD2TheBombDockyard = chkPD2TheBombDockyard.Checked,
+                chkPD2TheBombForest = chkPD2TheBombForest.Checked,
+                chkPD2TheButcher = chkPD2TheButcher.Checked,
+                chkPD2TheContinental = chkPD2TheContinental.Checked,
+                chkPD2TheDentist = chkPD2TheDentist.Checked,
+                chkPD2TheDiamond = chkPD2TheDiamond.Checked,
+                chkPD2TheElephant = chkPD2TheElephant.Checked,
+                chkPD2TheUkrainianPrisoner = chkPD2TheUkrainianPrisoner.Checked,
+                chkPD2TheWhiteHouse = chkPD2TheWhiteHouse.Checked,
+                chkPD2TheYachtHeist = chkPD2TheYachtHeist.Checked,
+                chkPD2TransportCrossroads = chkPD2TransportCrossroads.Checked,
+                chkPD2TransportDowntown = chkPD2TransportDowntown.Checked,
+                chkPD2TransportHarbor = chkPD2TransportHarbor.Checked,
+                chkPD2TransportPark = chkPD2TransportPark.Checked,
+                chkPD2TransportTrainHeist = chkPD2TransportTrainHeist.Checked,
+                chkPD2TransportUnderpass = chkPD2TransportUnderpass.Checked,
+                chkPD2UkrainianJob = chkPD2UkrainianJob.Checked,
+                chkPD2Undercover = chkPD2Undercover.Checked,
+                chkPD2Vlad = chkPD2Vlad.Checked,
+                chkPD2Watchdogs = chkPD2Watchdogs.Checked,
+                chkPD2WhiteXmas = chkPD2WhiteXmas.Checked,
+                chkPD399Boxes = chkPD399Boxes.Checked,
+                chkPD3Beckett = chkPD3Beckett.Checked,
+                chkPD3BlaineKeegan = chkPD3BlaineKeegan.Checked,
+                chkPD3BoysInBlue = chkPD3BoysInBlue.Checked,
+                chkPD3CookOff = chkPD3CookOff.Checked,
+                chkPD3DiamondDistrict = chkPD3DiamondDistrict.Checked,
+                chkPD3DirtyIce = chkPD3DirtyIce.Checked,
+                chkPD3FearNGreed = chkPD3FearNGreed.Checked,
+                chkPD3FirstWorldBank = chkPD3FirstWorldBank.Checked,
+                chkPD3GoldNSharke = chkPD3GoldNSharke.Checked,
+                chkPD3HoustonBreakout = chkPD3HoustonBreakout.Checked,
+                chkPD3Hybrid = chkPD3Hybrid.Checked,
+                chkPD3Locke = chkPD3Locke.Checked,
+                chkPD3Loud = chkPD3Loud.Checked,
+                chkPD3Mac = chkPD3Mac.Checked,
+                chkPD3NoRestForTheWicked = chkPD3NoRestForTheWicked.Checked,
+                chkPD3RoadRage = chkPD3RoadRage.Checked,
+                chkPD3RockTheCradle = chkPD3RockTheCradle.Checked,
+                chkPD3Shade = chkPD3Shade.Checked,
+                chkPD3Shayu = chkPD3Shayu.Checked,
+                chkPD3Stealth = chkPD3Stealth.Checked,
+                chkPD3SyntaxError = chkPD3SyntaxError.Checked,
+                chkPD3TheButcher = chkPD3TheButcher.Checked,
+                chkPD3TouchTheSky = chkPD3TouchTheSky.Checked,
+                chkPD3TurbidStation = chkPD3TurbidStation.Checked,
+                chkPD3UnderTheSurphaze = chkPD3UnderTheSurphaze.Checked,
+                chkPD3Vlad = chkPD3Vlad.Checked,
+                chkPD3PartyPowder = chkPD3PartyPowder.Checked
+            };
             string fileName = "";
-            using (FileNameSaver inputDialog = new FileNameSaver("Enter a name for the text file:"))
+            using (FileNameSaver inputDialog = new FileNameSaver("Enter a name for the save file:"))
             {
                 if (inputDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -3420,9 +3590,10 @@ namespace PaydayFranchiseRandomHeistSelecter
 
                     if (!string.IsNullOrWhiteSpace(fileName))
                     {
-                        string fullPath = Path.Combine(expectedFolderPath, fileName + ".txt");
-                        File.WriteAllText(fullPath,saveData);
-                        MessageBox.Show($"File saved", "Success");
+                        string fullPath = Path.Combine(expectedFolderPath, fileName + ".json");
+                        string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+                        File.WriteAllText(fullPath, json);
+                        MessageBox.Show("File saved", "Success");
                     }
                     else
                     {
@@ -3434,175 +3605,181 @@ namespace PaydayFranchiseRandomHeistSelecter
         private void btnLoadFile_Click(object sender, EventArgs e)
         {
             string homeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string expectedFolder = "PDRHS Prefrences Files";
+            string expectedFolder = "PDRHS Preferences Files";
             string expectedFolderPath = Path.Combine(homeDirectory, expectedFolder);
-            string[] content = { };
+            if (!Directory.Exists(expectedFolderPath))
+            {
+                Directory.CreateDirectory(expectedFolderPath);
+            }
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                Title = "select a file",
-                Filter = "Text Document (*.txt)|*.txt",
+                Title = "Select a file",
+                Filter = "JSON File (*.json)|*.json",
                 InitialDirectory = expectedFolderPath
             };
+
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string selectedFilePath = openFileDialog.FileName;
-                content = File.ReadAllLines(selectedFilePath);
-            }
-            try
-            {
-                numRowsMethod = int.Parse(content[0]);
-                numRowsCon = int.Parse(content[1]);
-                numRowsHeist = int.Parse(content[2]);
-                sortMethod = int.Parse(content[3]);
-                theme = int.Parse(content[4]);
-                chkPDTHCounterfeit.Checked = bool.Parse(content[5]);
-                chkPDTHDiamondHeist.Checked = bool.Parse(content[6]);
-                chkPDTHFirstWorldBank.Checked = bool.Parse(content[7]);
-                chkPDTHGreenBridge.Checked = bool.Parse(content[8]);
-                chkPDTHHeatStreet.Checked = bool.Parse(content[9]);
-                chkPDTHNoMercy.Checked = bool.Parse(content[10]);
-                chkPDTHPanicRoom.Checked = bool.Parse(content[11]);
-                chkPDTHSlaughterhouse.Checked = bool.Parse(content[12]);
-                chkPDTHUndercover.Checked = bool.Parse(content[13]);
-                chkPD2Aftershock.Checked = bool.Parse(content[14]);
-                chkPD2AlaskanDeal.Checked = bool.Parse(content[15]);
-                chkPD2ArtGallery.Checked = bool.Parse(content[16]);
-                chkPD2Bain.Checked = bool.Parse(content[17]);
-                chkPD2BankHeistCash.Checked = bool.Parse(content[18]);
-                chkPD2BankHeistDeposit.Checked = bool.Parse(content[19]);
-                chkPD2BankHeistGold.Checked = bool.Parse(content[20]);
-                chkPD2BankHeistRandom.Checked = bool.Parse(content[21]);
-                chkPD2BeneathTheMountain.Checked = bool.Parse(content[22]);
-                chkPD2BigOil.Checked = bool.Parse(content[23]);
-                chkPD2BirthOfSky.Checked = bool.Parse(content[24]);
-                chkPD2BlackCat.Checked = bool.Parse(content[25]);
-                chkPD2BlaineKeegan.Checked = bool.Parse(content[26]);
-                chkPD2BoilingPoint.Checked = bool.Parse(content[27]);
-                chkPD2BorderCrossing.Checked = bool.Parse(content[28]);
-                chkPD2BorderCrystals.Checked = bool.Parse(content[29]);
-                chkPD2BreakfastInTijuana.Checked = bool.Parse(content[30]);
-                chkPD2BreakinFeds.Checked = bool.Parse(content[31]);
-                chkPD2Brooklyn1010.Checked = bool.Parse(content[32]);
-                chkPD2BrooklynBank.Checked = bool.Parse(content[33]);
-                chkPD2BulucsMansion.Checked = bool.Parse(content[34]);
-                chkPD2CarShop.Checked = bool.Parse(content[35]);
-                chkPD2Classic.Checked = bool.Parse(content[36]);
-                chkPD2CookOff.Checked = bool.Parse(content[37]);
-                chkPD2Counterfeit.Checked = bool.Parse(content[38]);
-                chkPD2CrudeAwakening.Checked = bool.Parse(content[39]);
-                chkPD2CursedKillRoom.Checked = bool.Parse(content[40]);
-                chkPD2DiamondHeist.Checked = bool.Parse(content[41]);
-                chkPD2DiamondStore.Checked = bool.Parse(content[42]);
-                chkPD2DragonHeist.Checked = bool.Parse(content[43]);
-                chkPD2ElectionDay.Checked = bool.Parse(content[44]);
-                chkPD2Event.Checked = bool.Parse(content[45]);
-                chkPD2Firestarter.Checked = bool.Parse(content[46]);
-                chkPD2FirstWorldBank.Checked = bool.Parse(content[47]);
-                chkPD2FourStores.Checked = bool.Parse(content[48]);
-                chkPD2FramingFrame.Checked = bool.Parse(content[49]);
-                chkPD2GemmaMCShay.Checked = bool.Parse(content[50]);
-                chkPD2GoatSimulator.Checked = bool.Parse(content[51]);
-                chkPD2GOBank.Checked = bool.Parse(content[52]);
-                chkPD2GoldenGrinCasino.Checked = bool.Parse(content[53]);
-                chkPD2GreenBridge.Checked = bool.Parse(content[54]);
-                chkPD2HeatStreet.Checked = bool.Parse(content[55]);
-                chkPD2Hector.Checked = bool.Parse(content[56]);
-                chkPD2HellsIsland.Checked = bool.Parse(content[57]);
-                chkPD2HenrysRock.Checked = bool.Parse(content[58]);
-                chkPD2HostileTakeover.Checked = bool.Parse(content[59]);
-                chkPD2HotlineMiami.Checked = bool.Parse(content[60]);
-                chkPD2Hoxton.Checked = bool.Parse(content[61]);
-                chkPD2HoxtonBreakout.Checked = bool.Parse(content[62]);
-                chkPD2HoxtonRevenge.Checked = bool.Parse(content[63]);
-                chkPD2Hybrid.Checked = bool.Parse(content[64]);
-                chkPD2JewelryStore.Checked = bool.Parse(content[65]);
-                chkPD2Jimmy.Checked = bool.Parse(content[66]);
-                chkPD2JiuFeng.Checked = bool.Parse(content[67]);
-                chkPD2LabRats.Checked = bool.Parse(content[68]);
-                chkPD2Locke.Checked = bool.Parse(content[69]);
-                chkPD2LostInTransit.Checked = bool.Parse(content[70]);
-                chkPD2Loud.Checked = bool.Parse(content[71]);
-                chkPD2Mallcrasher.Checked = bool.Parse(content[72]);
-                chkPD2Meltdown.Checked = bool.Parse(content[73]);
-                chkPD2MidlandRanch.Checked = bool.Parse(content[74]);
-                chkPD2MountainMaster.Checked = bool.Parse(content[75]);
-                chkPD2MurkyStation.Checked = bool.Parse(content[76]);
-                chkPD2Nightclub.Checked = bool.Parse(content[77]);
-                chkPD2NoMercy.Checked = bool.Parse(content[78]);
-                chkPD2PanicRoom.Checked = bool.Parse(content[79]);
-                chkPD2PrisonNightmare.Checked = bool.Parse(content[80]);
-                chkPD2Rats.Checked = bool.Parse(content[81]);
-                chkPD2ReservoirDogsHeist.Checked = bool.Parse(content[82]);
-                chkPD2SafeHouseNightmare.Checked = bool.Parse(content[83]);
-                chkPD2SafeHouseRaid.Checked = bool.Parse(content[84]);
-                chkPD2SanMartinBank.Checked = bool.Parse(content[85]);
-                chkPD2SantasWorkshop.Checked = bool.Parse(content[86]);
-                chkPD2ScarfaceMansion.Checked = bool.Parse(content[87]);
-                chkPD2ShacklethorneAuction.Checked = bool.Parse(content[88]);
-                chkPD2ShadowRaid.Checked = bool.Parse(content[89]);
-                chkPD2Shayu.Checked = bool.Parse(content[90]);
-                chkPD2Slaughterhouse.Checked = bool.Parse(content[91]);
-                chkPD2StealingXmas.Checked = bool.Parse(content[92]);
-                chkPD2Stealth.Checked = bool.Parse(content[93]);
-                chkPD2TheAlessoHeist.Checked = bool.Parse(content[94]);
-                chkPD2TheBigBank.Checked = bool.Parse(content[95]);
-                chkPD2TheBikerHeist.Checked = bool.Parse(content[96]);
-                chkPD2TheBombDockyard.Checked = bool.Parse(content[97]);
-                chkPD2TheBombForest.Checked = bool.Parse(content[98]);
-                chkPD2TheButcher.Checked = bool.Parse(content[99]);
-                chkPD2TheContinental.Checked = bool.Parse(content[100]);
-                chkPD2TheDentist.Checked = bool.Parse(content[101]);
-                chkPD2TheDiamond.Checked = bool.Parse(content[102]);
-                chkPD2TheElephant.Checked = bool.Parse(content[103]);
-                chkPD2TheUkrainianPrisoner.Checked = bool.Parse(content[104]);
-                chkPD2TheWhiteHouse.Checked = bool.Parse(content[105]);
-                chkPD2TheYachtHeist.Checked = bool.Parse(content[106]);
-                chkPD2TransportCrossroads.Checked = bool.Parse(content[107]);
-                chkPD2TransportDowntown.Checked = bool.Parse(content[108]);
-                chkPD2TransportHarbor.Checked = bool.Parse(content[109]);
-                chkPD2TransportPark.Checked = bool.Parse(content[110]);
-                chkPD2TransportTrainHeist.Checked = bool.Parse(content[111]);
-                chkPD2TransportUnderpass.Checked = bool.Parse(content[112]);
-                chkPD2UkrainianJob.Checked = bool.Parse(content[113]);
-                chkPD2Undercover.Checked = bool.Parse(content[114]);
-                chkPD2Vlad.Checked = bool.Parse(content[115]);
-                chkPD2Watchdogs.Checked = bool.Parse(content[116]);
-                chkPD2WhiteXmas.Checked = bool.Parse(content[117]);
-                chkPD399Boxes.Checked = bool.Parse(content[118]);
-                chkPD3Beckett.Checked = bool.Parse(content[119]);
-                chkPD3BlaineKeegan.Checked = bool.Parse(content[120]);
-                chkPD3BoysInBlue.Checked = bool.Parse(content[121]);
-                chkPD3CookOff.Checked = bool.Parse(content[122]);
-                chkPD3DiamondDistrict.Checked = bool.Parse(content[123]);
-                chkPD3DirtyIce.Checked = bool.Parse(content[124]);
-                chkPD3FearNGreed.Checked = bool.Parse(content[125]);
-                chkPD3FirstWorldBank.Checked = bool.Parse(content[126]);
-                chkPD3GoldNSharke.Checked = bool.Parse(content[127]);
-                chkPD3HoustonBreakout.Checked = bool.Parse(content[128]);
-                chkPD3Hybrid.Checked = bool.Parse(content[129]);
-                chkPD3Locke.Checked = bool.Parse(content[130]);
-                chkPD3Loud.Checked = bool.Parse(content[131]);
-                chkPD3Mac.Checked = bool.Parse(content[132]);
-                chkPD3NoRestForTheWicked.Checked = bool.Parse(content[133]);
-                chkPD3RoadRage.Checked = bool.Parse(content[134]);
-                chkPD3RockTheCradle.Checked = bool.Parse(content[135]);
-                chkPD3Shade.Checked = bool.Parse(content[136]);
-                chkPD3Shayu.Checked = bool.Parse(content[137]);
-                chkPD3Stealth.Checked = bool.Parse(content[138]);
-                chkPD3SyntaxError.Checked = bool.Parse(content[139]);
-                chkPD3TheButcher.Checked = bool.Parse(content[140]);
-                chkPD3TouchTheSky.Checked = bool.Parse(content[141]);
-                chkPD3TurbidStation.Checked = bool.Parse(content[142]);
-                chkPD3UnderTheSurphaze.Checked = bool.Parse(content[143]);
-                chkPD3Vlad.Checked = bool.Parse(content[144]);
-                chkPD3PartyPowder.Checked = bool.Parse(content[145]);
-                Cancel();
-                Theme();
-                MessageBox.Show($"File loaded successfully", "Success");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"{ex}", "Invalid File");
+                try
+                {
+                    string json = File.ReadAllText(openFileDialog.FileName);
+                    UserPreferences data = JsonSerializer.Deserialize<UserPreferences>(json);
+
+                    numRowsMethod = data.numRowsMethod;
+                    numRowsCon = data.numRowsCon;
+                    numRowsHeist = data.numRowsHeist;
+                    theme = data.theme;
+                    selectionMethod = data.selectionMethod;
+                    sortMethod = data.sortMethod;
+                    chkPDTHCounterfeit.Checked = data.chkPDTHCounterfeit;
+                    chkPDTHDiamondHeist.Checked = data.chkPDTHDiamondHeist;
+                    chkPDTHFirstWorldBank.Checked = data.chkPDTHFirstWorldBank;
+                    chkPDTHGreenBridge.Checked = data.chkPDTHGreenBridge;
+                    chkPDTHHeatStreet.Checked = data.chkPDTHHeatStreet;
+                    chkPDTHNoMercy.Checked = data.chkPDTHNoMercy;
+                    chkPDTHPanicRoom.Checked = data.chkPDTHPanicRoom;
+                    chkPDTHSlaughterhouse.Checked = data.chkPDTHSlaughterhouse;
+                    chkPDTHUndercover.Checked = data.chkPDTHUndercover;
+                    chkPD2Aftershock.Checked = data.chkPD2Aftershock;
+                    chkPD2AlaskanDeal.Checked = data.chkPD2AlaskanDeal;
+                    chkPD2ArtGallery.Checked = data.chkPD2ArtGallery;
+                    chkPD2Bain.Checked = data.chkPD2Bain;
+                    chkPD2BankHeistCash.Checked = data.chkPD2BankHeistCash;
+                    chkPD2BankHeistDeposit.Checked = data.chkPD2BankHeistDeposit;
+                    chkPD2BankHeistGold.Checked = data.chkPD2BankHeistGold;
+                    chkPD2BankHeistRandom.Checked = data.chkPD2BankHeistRandom;
+                    chkPD2BeneathTheMountain.Checked = data.chkPD2BeneathTheMountain;
+                    chkPD2BigOil.Checked = data.chkPD2BigOil;
+                    chkPD2BirthOfSky.Checked = data.chkPD2BirthOfSky;
+                    chkPD2BlackCat.Checked = data.chkPD2BlackCat;
+                    chkPD2BlaineKeegan.Checked = data.chkPD2BlaineKeegan;
+                    chkPD2BoilingPoint.Checked = data.chkPD2BoilingPoint;
+                    chkPD2BorderCrossing.Checked = data.chkPD2BorderCrossing;
+                    chkPD2BorderCrystals.Checked = data.chkPD2BorderCrystals;
+                    chkPD2BreakfastInTijuana.Checked = data.chkPD2BreakfastInTijuana;
+                    chkPD2BreakinFeds.Checked = data.chkPD2BreakinFeds;
+                    chkPD2Brooklyn1010.Checked = data.chkPD2Brooklyn1010;
+                    chkPD2BrooklynBank.Checked = data.chkPD2BrooklynBank;
+                    chkPD2BulucsMansion.Checked = data.chkPD2BulucsMansion;
+                    chkPD2CarShop.Checked = data.chkPD2CarShop;
+                    chkPD2Classic.Checked = data.chkPD2Classic;
+                    chkPD2CookOff.Checked = data.chkPD2CookOff;
+                    chkPD2Counterfeit.Checked = data.chkPD2Counterfeit;
+                    chkPD2CrudeAwakening.Checked = data.chkPD2CrudeAwakening;
+                    chkPD2CursedKillRoom.Checked = data.chkPD2CursedKillRoom;
+                    chkPD2DiamondHeist.Checked = data.chkPD2DiamondHeist;
+                    chkPD2DiamondStore.Checked = data.chkPD2DiamondStore;
+                    chkPD2DragonHeist.Checked = data.chkPD2DragonHeist;
+                    chkPD2ElectionDay.Checked = data.chkPD2ElectionDay;
+                    chkPD2Event.Checked = data.chkPD2Event;
+                    chkPD2Firestarter.Checked = data.chkPD2Firestarter;
+                    chkPD2FirstWorldBank.Checked = data.chkPD2FirstWorldBank;
+                    chkPD2FourStores.Checked = data.chkPD2FourStores;
+                    chkPD2FramingFrame.Checked = data.chkPD2FramingFrame;
+                    chkPD2GemmaMCShay.Checked = data.chkPD2GemmaMCShay;
+                    chkPD2GoatSimulator.Checked = data.chkPD2GoatSimulator;
+                    chkPD2GOBank.Checked = data.chkPD2GOBank;
+                    chkPD2GoldenGrinCasino.Checked = data.chkPD2GoldenGrinCasino;
+                    chkPD2GreenBridge.Checked = data.chkPD2GreenBridge;
+                    chkPD2HeatStreet.Checked = data.chkPD2HeatStreet;
+                    chkPD2Hector.Checked = data.chkPD2Hector;
+                    chkPD2HellsIsland.Checked = data.chkPD2HellsIsland;
+                    chkPD2HenrysRock.Checked = data.chkPD2HenrysRock;
+                    chkPD2HostileTakeover.Checked = data.chkPD2HostileTakeover;
+                    chkPD2HotlineMiami.Checked = data.chkPD2HotlineMiami;
+                    chkPD2Hoxton.Checked = data.chkPD2Hoxton;
+                    chkPD2HoxtonBreakout.Checked = data.chkPD2HoxtonBreakout;
+                    chkPD2HoxtonRevenge.Checked = data.chkPD2HoxtonRevenge;
+                    chkPD2Hybrid.Checked = data.chkPD2Hybrid;
+                    chkPD2JewelryStore.Checked = data.chkPD2JewelryStore;
+                    chkPD2Jimmy.Checked = data.chkPD2Jimmy;
+                    chkPD2JiuFeng.Checked = data.chkPD2JiuFeng;
+                    chkPD2LabRats.Checked = data.chkPD2LabRats;
+                    chkPD2Locke.Checked = data.chkPD2Locke;
+                    chkPD2LostInTransit.Checked = data.chkPD2LostInTransit;
+                    chkPD2Loud.Checked = data.chkPD2Loud;
+                    chkPD2Mallcrasher.Checked = data.chkPD2Mallcrasher;
+                    chkPD2Meltdown.Checked = data.chkPD2Meltdown;
+                    chkPD2MidlandRanch.Checked = data.chkPD2MidlandRanch;
+                    chkPD2MountainMaster.Checked = data.chkPD2MountainMaster;
+                    chkPD2MurkyStation.Checked = data.chkPD2MurkyStation;
+                    chkPD2Nightclub.Checked = data.chkPD2Nightclub;
+                    chkPD2NoMercy.Checked = data.chkPD2NoMercy;
+                    chkPD2PanicRoom.Checked = data.chkPD2PanicRoom;
+                    chkPD2PrisonNightmare.Checked = data.chkPD2PrisonNightmare;
+                    chkPD2Rats.Checked = data.chkPD2Rats;
+                    chkPD2ReservoirDogsHeist.Checked = data.chkPD2ReservoirDogsHeist;
+                    chkPD2SafeHouseNightmare.Checked = data.chkPD2SafeHouseNightmare;
+                    chkPD2SafeHouseRaid.Checked = data.chkPD2SafeHouseRaid;
+                    chkPD2SanMartinBank.Checked = data.chkPD2SanMartinBank;
+                    chkPD2SantasWorkshop.Checked = data.chkPD2SantasWorkshop;
+                    chkPD2ScarfaceMansion.Checked = data.chkPD2ScarfaceMansion;
+                    chkPD2ShacklethorneAuction.Checked = data.chkPD2ShacklethorneAuction;
+                    chkPD2ShadowRaid.Checked = data.chkPD2ShadowRaid;
+                    chkPD2Shayu.Checked = data.chkPD2Shayu;
+                    chkPD2Slaughterhouse.Checked = data.chkPD2Slaughterhouse;
+                    chkPD2StealingXmas.Checked = data.chkPD2StealingXmas;
+                    chkPD2Stealth.Checked = data.chkPD2Stealth;
+                    chkPD2TheAlessoHeist.Checked = data.chkPD2TheAlessoHeist;
+                    chkPD2TheBigBank.Checked = data.chkPD2TheBigBank;
+                    chkPD2TheBikerHeist.Checked = data.chkPD2TheBikerHeist;
+                    chkPD2TheBombDockyard.Checked = data.chkPD2TheBombDockyard;
+                    chkPD2TheBombForest.Checked = data.chkPD2TheBombForest;
+                    chkPD2TheButcher.Checked = data.chkPD2TheButcher;
+                    chkPD2TheContinental.Checked = data.chkPD2TheContinental;
+                    chkPD2TheDentist.Checked = data.chkPD2TheDentist;
+                    chkPD2TheDiamond.Checked = data.chkPD2TheDiamond;
+                    chkPD2TheElephant.Checked = data.chkPD2TheElephant;
+                    chkPD2TheUkrainianPrisoner.Checked = data.chkPD2TheUkrainianPrisoner;
+                    chkPD2TheWhiteHouse.Checked = data.chkPD2TheWhiteHouse;
+                    chkPD2TheYachtHeist.Checked = data.chkPD2TheYachtHeist;
+                    chkPD2TransportCrossroads.Checked = data.chkPD2TransportCrossroads;
+                    chkPD2TransportDowntown.Checked = data.chkPD2TransportDowntown;
+                    chkPD2TransportHarbor.Checked = data.chkPD2TransportHarbor;
+                    chkPD2TransportPark.Checked = data.chkPD2TransportPark;
+                    chkPD2TransportTrainHeist.Checked = data.chkPD2TransportTrainHeist;
+                    chkPD2TransportUnderpass.Checked = data.chkPD2TransportUnderpass;
+                    chkPD2UkrainianJob.Checked = data.chkPD2UkrainianJob;
+                    chkPD2Undercover.Checked = data.chkPD2Undercover;
+                    chkPD2Vlad.Checked = data.chkPD2Vlad;
+                    chkPD2Watchdogs.Checked = data.chkPD2Watchdogs;
+                    chkPD2WhiteXmas.Checked = data.chkPD2WhiteXmas;
+                    chkPD399Boxes.Checked = data.chkPD399Boxes;
+                    chkPD3Beckett.Checked = data.chkPD3Beckett;
+                    chkPD3BlaineKeegan.Checked = data.chkPD3BlaineKeegan;
+                    chkPD3BoysInBlue.Checked = data.chkPD3BoysInBlue;
+                    chkPD3CookOff.Checked = data.chkPD3CookOff;
+                    chkPD3DiamondDistrict.Checked = data.chkPD3DiamondDistrict;
+                    chkPD3DirtyIce.Checked = data.chkPD3DirtyIce;
+                    chkPD3FearNGreed.Checked = data.chkPD3FearNGreed;
+                    chkPD3FirstWorldBank.Checked = data.chkPD3FirstWorldBank;
+                    chkPD3GoldNSharke.Checked = data.chkPD3GoldNSharke;
+                    chkPD3HoustonBreakout.Checked = data.chkPD3HoustonBreakout;
+                    chkPD3Hybrid.Checked = data.chkPD3Hybrid;
+                    chkPD3Locke.Checked = data.chkPD3Locke;
+                    chkPD3Loud.Checked = data.chkPD3Loud;
+                    chkPD3Mac.Checked = data.chkPD3Mac;
+                    chkPD3NoRestForTheWicked.Checked = data.chkPD3NoRestForTheWicked;
+                    chkPD3RoadRage.Checked = data.chkPD3RoadRage;
+                    chkPD3RockTheCradle.Checked = data.chkPD3RockTheCradle;
+                    chkPD3Shade.Checked = data.chkPD3Shade;
+                    chkPD3Shayu.Checked = data.chkPD3Shayu;
+                    chkPD3Stealth.Checked = data.chkPD3Stealth;
+                    chkPD3SyntaxError.Checked = data.chkPD3SyntaxError;
+                    chkPD3TheButcher.Checked = data.chkPD3TheButcher;
+                    chkPD3TouchTheSky.Checked = data.chkPD3TouchTheSky;
+                    chkPD3TurbidStation.Checked = data.chkPD3TurbidStation;
+                    chkPD3UnderTheSurphaze.Checked = data.chkPD3UnderTheSurphaze;
+                    chkPD3Vlad.Checked = data.chkPD3Vlad;
+                    chkPD3PartyPowder.Checked = data.chkPD3PartyPowder;
+                    Cancel();
+                    Theme();
+                    MessageBox.Show("File loaded successfully", "Success");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"{ex}", "Invalid File");
+                }
             }
         }
     }
