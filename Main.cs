@@ -1060,6 +1060,7 @@ namespace PaydayFranchiseRandomHeistSelecter
             txtNumRowsMethod.Text = numRowsMethod.ToString();
             cboSortMethod.SelectedIndex = sortMethod;
             cboTheme.SelectedIndex = theme;
+            cboSelectMethod.SelectedIndex = selectionMethod;
         }
         private void btnCancel_Click(object sender, EventArgs e)
         {
