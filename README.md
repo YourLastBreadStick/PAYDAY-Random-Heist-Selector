@@ -1,6 +1,9 @@
 # PAYDAY-Random-Heist-Selector
 Allows for the random selection of a heist from a user selected pool of heists from all 3 of the main line Payday games(PAYDAY: The Heist, PAYDAY 2, and PAYDAY 3)
 # Change Log
+7/4/25
+- Hot fix related to loading save data and canceling changes
+
 7/3/25
 - Added Neglection Weighting as a randomization option in the settings
 - Improved the user settings saving system by changing it to a JSON system rather than a TXT system
